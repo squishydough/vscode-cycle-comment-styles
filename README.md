@@ -1,6 +1,9 @@
-# cycle-comment-styles README
+# Cycle Comment Styles README
 
-This is the README for your extension "cycle-comment-styles". After writing up a brief description, we recommend including the following sections.
+This is a VSCode extension inspired by Jamie Kyle's 
+[tweet requesting this functionality](https://twitter.com/buildsghost/status/1514692171131097097). 
+I had never made an extension before, so this call to action felt like a fun 
+exercise!
 
 ## Features
 
