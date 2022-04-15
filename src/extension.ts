@@ -9,13 +9,21 @@ const singleLinePatterns = [
 ];
 
 function textMatchesSingleLinePattern(text: string): [boolean, number] {
+  /**
+   * Array index of singleLinePatterns that was matched.
+   * This is used to determine the next pattern to cycle to.
+   */
   let matchingPatternIndex = -1;
 
   const patternMatchFound = singleLinePatterns.some((pattern, patternIndex) => {
-    const start = text.substring(0, pattern.start.length);
-    const end = text.substring(text.length - pattern.end.length);
+    const textLeft = text.substring(0, pattern.start.length);
+    const textRight = text.substring(text.length - pattern.end.length);
+
+    // If the text matches the start and end pattern, we have a match.
+    // If the ending is a new line (\n), no ending pattern match is needed.
     const patternMatches =
-      start === pattern.start && (end === pattern.end || pattern.end === '\n');
+      textLeft === pattern.start &&
+      (textRight === pattern.end || pattern.end === '\n');
     if (patternMatches) {
       matchingPatternIndex = patternIndex;
     }
@@ -56,7 +64,6 @@ function handleSingleLineComments(
       if (matchingPattern.end === '\n') {
         newText = `${newText} ${endPattern}`;
       } else {
-        console.info('firing else!');
         newText = newText.replace(matchingPattern.end, endPattern).trim();
       }
 
