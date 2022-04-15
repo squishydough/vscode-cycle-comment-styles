@@ -14,7 +14,7 @@ suite('Extension Test Suite', () => {
 
   /**
    * Function should correctly identify whether a string
-   * is an appropriate signle-line comment or not.
+   * is an appropriate single-line comment or not.
    */
   test('textMatchesSingleLinePattern', () => {
     assert.deepStrictEqual(textMatchesSingleLinePattern('// comment'), [
