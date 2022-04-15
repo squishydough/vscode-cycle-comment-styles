@@ -10,14 +10,14 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:cycle-comment-styles.cycleSingleLineStyles"
+    "onCommand:cycle-comment-styles.cycleCommentStyles"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "cycle-comment-styles.cycleSingleLineStyles",
-        "title": "Cycle Comment Styles: Cycle Single-Line Styles"
+        "command": "cycle-comment-styles.cycleCommentStyles",
+        "title": "Cycle Comment Styles: Cycle Comment Styles"
       }
     ]
   },

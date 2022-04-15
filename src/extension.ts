@@ -2,105 +2,96 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-/**
- * Cycles through all single-line comment types for each selected comment
- */
-function handleCycleSingleLineStyles() {
-  /** All possible patterns for single-line comments. */
-  const commentPatterns = [
-    { start: '//', end: '' },
-    { start: '/**', end: '*/' }, // Has to come before single star or it messes up the replacement!
-    { start: '/*', end: '*/' },
-  ];
+const singleLinePatterns = [
+  { start: '//', end: '\n' },
+  { start: '/**', end: '*/' }, // Has to come before single star or it messes up the replacement!
+  { start: '/*', end: '*/' },
+];
 
-  function textMatchesPattern(text: string): [boolean, number] {
-    let matchingPatternIndex = -1;
-
-    const textMatchesPattern = commentPatterns.some((pattern, patternIndex) => {
-      const start = text.substring(0, pattern.start.length);
-      const end = text.substring(text.length - pattern.end.length);
-      const patternMatches =
-        start === pattern.start && (end === pattern.end || pattern.end === '');
-      if (patternMatches) {
-        matchingPatternIndex = patternIndex;
-      }
-      return patternMatches;
-    });
-    return [textMatchesPattern, matchingPatternIndex];
-  }
-
-  const editor = vscode.window.activeTextEditor;
-  if (!editor) {
-    return;
-  }
-
-  /** All the instances of selected text. */
-  const selections = editor.selections;
-
-  /**
-   * Index of the `patterns` array that matches in the selections that are comments.
-   * This is used to increment to the next pattern type.
-   */
+function textMatchesSingleLinePattern(text: string): [boolean, number] {
   let matchingPatternIndex = -1;
 
-  /**
-   * Remove selections that
-   *   1. don't match any `patterns`
-   *   2. are multi-line comments
-   */
-  const relevantSelections = selections.filter((selection) => {
-    const text = editor.document.getText(selection);
-
-    // TODO We should automatically cycle through multi-line styles automatically if detected
-    if (text.includes('\n')) {
-      return false;
-    }
-
-    const [textMatches, patternIndex] = textMatchesPattern(text);
-    // If the text matches a pattern, set the matchingPatternIndex to the index of the pattern
-    if (textMatches) {
+  const patternMatchFound = singleLinePatterns.some((pattern, patternIndex) => {
+    const start = text.substring(0, pattern.start.length);
+    const end = text.substring(text.length - pattern.end.length);
+    const patternMatches =
+      start === pattern.start && (end === pattern.end || pattern.end === '\n');
+    if (patternMatches) {
       matchingPatternIndex = patternIndex;
     }
-    return textMatches;
+    return patternMatches;
   });
 
-  let nextPatternIndex = matchingPatternIndex + 1;
-  const nextPattern =
-    commentPatterns[
-      nextPatternIndex === commentPatterns.length ? 0 : nextPatternIndex
-    ];
+  return [patternMatchFound, matchingPatternIndex];
+}
 
-  /** Apply next pattern to all matching selections. */
-  const patterns = [
-    { start: '//', end: '' },
-    { start: '/**', end: '*/' }, // Has to come before single star or it messes up the replacement!
-    { start: '/*', end: '*/' },
-  ];
-
+function handleSingleLineComments(
+  selections: vscode.Selection[],
+  editor: vscode.TextEditor
+) {
   // Replace all matching selections with the next pattern.
   editor.edit((editBuilder) => {
-    relevantSelections.forEach((selection) => {
+    selections.forEach((selection) => {
       const text = editor.document.getText(selection);
-      const [textMatches, matchingPatternIndex] = textMatchesPattern(text);
+
+      const [textMatches, matchingPatternIndex] =
+        textMatchesSingleLinePattern(text);
+      let nextPatternIndex = matchingPatternIndex + 1;
 
       if (!textMatches || matchingPatternIndex === -1) {
         return;
       }
 
-      const matchingPattern = patterns[matchingPatternIndex];
+      const matchingPattern = singleLinePatterns[matchingPatternIndex];
+      const nextPattern =
+        singleLinePatterns[
+          nextPatternIndex !== singleLinePatterns.length ? nextPatternIndex : 0
+        ];
+
       // Replace comment at start of line with next pattern.
       let newText = text.replace(matchingPattern.start, nextPattern.start);
       // Replace pattern at end of line with next pattern
       // Double-slash comment has no end pattern, so we don't replace it.
-      if (matchingPattern.end === '') {
-        newText = `${newText}${nextPattern.end}`;
+      const endPattern = nextPattern.end === '\n' ? '' : nextPattern.end;
+      if (matchingPattern.end === '\n') {
+        newText = `${newText} ${endPattern}`;
       } else {
-        newText.replace(matchingPattern.end, nextPattern.end);
+        console.info('firing else!');
+        newText = newText.replace(matchingPattern.end, endPattern).trim();
       }
 
       editBuilder.replace(selection, newText);
     });
   });
+}
+
+/**
+ * Cycles through all single-line comment types for each selected comment
+ */
+function handleCycleCommentStyles() {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    return;
+  }
+
+  /**
+   * Index of the `patterns` array that matches in the selections that are comments.
+   * This is used to increment to the next pattern type.
+   */
+  const singleLineSelections: vscode.Selection[] = [];
+  const multiLineSelections: vscode.Selection[] = [];
+
+  editor.selections.forEach((selection) => {
+    const text = editor.document.getText(selection);
+    if (text.includes('\n')) {
+      multiLineSelections.push(selection);
+    } else {
+      singleLineSelections.push(selection);
+    }
+  });
+
+  handleSingleLineComments(singleLineSelections, editor);
+  // TODO handleMultiLineComments(multiLineSelections, matchingPatternIndex, editor);
 }
 
 // this method is called when your extension is activated
@@ -114,8 +105,8 @@ export function activate(context: vscode.ExtensionContext) {
   // Now provide the implementation of the command with registerCommand
   // The commandId parameter must match the command field in package.json
   let disposable = vscode.commands.registerCommand(
-    'cycle-comment-styles.cycleSingleLineStyles',
-    () => handleCycleSingleLineStyles()
+    'cycle-comment-styles.cycleCommentStyles',
+    () => handleCycleCommentStyles()
   );
 
   context.subscriptions.push(disposable);
