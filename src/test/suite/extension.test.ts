@@ -3,11 +3,38 @@ import * as assert from 'assert';
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import * as vscode from 'vscode';
-import { textMatchesSingleLinePattern } from '../../extension';
-// import * as myExtension from '../../extension';
+import {
+  handleSingleLineComments,
+  textMatchesSingleLinePattern,
+} from '../../extension';
+import type { Comment } from '../../extension';
 
 suite('Extension Test Suite', () => {
   vscode.window.showInformationMessage('Start all tests.');
+
+  const mockComments: Comment[] = [
+    {
+      selection: new vscode.Selection(0, 0, 0, 0),
+      text: '// comment 1',
+      newText: null,
+      patternIndex: 0,
+      commentType: 'single',
+    },
+    {
+      selection: new vscode.Selection(1, 0, 1, 0),
+      text: '/** comment 2 */',
+      newText: null,
+      patternIndex: 1,
+      commentType: 'single',
+    },
+    {
+      selection: new vscode.Selection(2, 0, 2, 0),
+      text: '/* comment 3 */',
+      newText: null,
+      patternIndex: 2,
+      commentType: 'single',
+    },
+  ];
 
   test('textMatchesSingleLinePattern', () => {
     assert.deepStrictEqual(textMatchesSingleLinePattern('// comment'), [
@@ -38,5 +65,23 @@ suite('Extension Test Suite', () => {
       false,
       -1,
     ]);
+  });
+
+  test('handleSingleLineComments', () => {
+    const updatedComments = handleSingleLineComments(mockComments);
+    assert(updatedComments.length === 3);
+    assert(updatedComments[0].newText === '/** comment 1 */');
+    assert(updatedComments[1].newText === '/** comment 2 */');
+    assert(updatedComments[2].newText === '/** comment 3 */');
+
+    const updatedComments2 = handleSingleLineComments(updatedComments);
+    assert(updatedComments2[0].newText === '/* comment 1 */');
+    assert(updatedComments2[1].newText === '/* comment 2 */');
+    assert(updatedComments2[2].newText === '/* comment 3 */');
+
+    const updatedComments3 = handleSingleLineComments(updatedComments2);
+    assert(updatedComments3[0].newText === '// comment 1');
+    assert(updatedComments3[1].newText === '// comment 2');
+    assert(updatedComments3[2].newText === '// comment 3');
   });
 });
