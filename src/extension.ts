@@ -1,14 +1,9 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { singleLinePatterns } from './patterns';
 
-const singleLinePatterns = [
-  { start: '//', end: '\n' },
-  { start: '/**', end: '*/' }, // Has to come before single star or it messes up the replacement!
-  { start: '/*', end: '*/' },
-];
-
-function textMatchesSingleLinePattern(text: string): [boolean, number] {
+export function textMatchesSingleLinePattern(text: string): [boolean, number] {
   /**
    * Array index of singleLinePatterns that was matched.
    * This is used to determine the next pattern to cycle to.
@@ -100,6 +95,8 @@ export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
   // console.log('Congratulations, your extension "cycle-comment-styles" is now active!');
+
+  console.info(textMatchesSingleLinePattern('// comment'));
 
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with registerCommand
