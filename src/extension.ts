@@ -65,19 +65,12 @@ function handleSingleLineComments(
   });
 }
 
-/**
- * Cycles through all single-line comment types for each selected comment
- */
 function handleCycleCommentStyles() {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
     return;
   }
 
-  /**
-   * Index of the `patterns` array that matches in the selections that are comments.
-   * This is used to increment to the next pattern type.
-   */
   const singleLineSelections: vscode.Selection[] = [];
   const multiLineSelections: vscode.Selection[] = [];
 
