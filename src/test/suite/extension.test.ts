@@ -56,21 +56,18 @@ suite('Extension Test Suite', () => {
       {
         selection: new vscode.Selection(0, 0, 0, 0),
         text: '// comment 1',
-        newText: null,
         patternIndex: 0,
         commentType: 'single',
       },
       {
         selection: new vscode.Selection(1, 0, 1, 0),
         text: '/** comment 2 */',
-        newText: null,
         patternIndex: 1,
         commentType: 'single',
       },
       {
         selection: new vscode.Selection(2, 0, 2, 0),
         text: '/* comment 3 */',
-        newText: null,
         patternIndex: 2,
         commentType: 'single',
       },
@@ -78,20 +75,20 @@ suite('Extension Test Suite', () => {
 
     const updatedComments = handleSingleLineComments(mockComments);
     assert(updatedComments.length === 3);
-    assert(updatedComments[0].newText === '/** comment 1 */');
-    assert(updatedComments[1].newText === '/** comment 2 */');
-    assert(updatedComments[2].newText === '/** comment 3 */');
+    assert(updatedComments[0].text === '/** comment 1 */');
+    assert(updatedComments[1].text === '/** comment 2 */');
+    assert(updatedComments[2].text === '/** comment 3 */');
 
     const updatedComments2 = handleSingleLineComments(updatedComments);
     assert(updatedComments2.length === 3);
-    assert(updatedComments2[0].newText === '/* comment 1 */');
-    assert(updatedComments2[1].newText === '/* comment 2 */');
-    assert(updatedComments2[2].newText === '/* comment 3 */');
+    assert(updatedComments2[0].text === '/* comment 1 */');
+    assert(updatedComments2[1].text === '/* comment 2 */');
+    assert(updatedComments2[2].text === '/* comment 3 */');
 
     const updatedComments3 = handleSingleLineComments(updatedComments2);
     assert(updatedComments3.length === 3);
-    assert(updatedComments3[0].newText === '// comment 1');
-    assert(updatedComments3[1].newText === '// comment 2');
-    assert(updatedComments3[2].newText === '// comment 3');
+    assert(updatedComments3[0].text === '// comment 1');
+    assert(updatedComments3[1].text === '// comment 2');
+    assert(updatedComments3[2].text === '// comment 3');
   });
 });

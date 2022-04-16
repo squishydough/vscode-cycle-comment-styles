@@ -6,7 +6,6 @@ import { singleLinePatterns } from './patterns';
 export interface Comment {
   selection: vscode.Selection;
   text: string;
-  newText: string | null;
   patternIndex: number;
   commentType: 'single' | 'multi';
 }
@@ -79,12 +78,13 @@ export function handleSingleLineComments(comments: Comment[]): Comment[] {
       newText = newText.replace(matchingPattern.end, endPattern).trim();
     }
 
-    return {
+    const updatedComment: Comment = {
       ...comment,
       text: newText,
-      newText,
       patternIndex: nextPatternIndex,
-    } as Comment;
+    };
+
+    return updatedComment;
   });
 
   const editor = vscode.window.activeTextEditor;
@@ -96,10 +96,7 @@ export function handleSingleLineComments(comments: Comment[]): Comment[] {
   // Replace all matching selections with the new text
   editor.edit((editBuilder) => {
     updatedComments.forEach((comment) => {
-      if (!comment.newText) {
-        return;
-      }
-      editBuilder.replace(comment.selection, comment.newText);
+      editBuilder.replace(comment.selection, comment.text);
     });
   });
   return updatedComments;
@@ -127,7 +124,6 @@ function parseSingleLineComments(selections: vscode.Selection[]): Comment[] {
     const singleLineComment: Comment = {
       selection,
       text,
-      newText: null,
       patternIndex: matchingPatternIndex,
       commentType: 'single',
     };
