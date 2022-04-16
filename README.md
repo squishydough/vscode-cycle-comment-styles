@@ -26,9 +26,9 @@ and expand or collapse them.
 
 This extension contributes the following settings:
 
-* `cycle-comment-styles.singleLineCommentStyle`: Whether to cycle comment styles or convert to a single specific style for single-line comments. Valid values are `default`, `//`, `/*`, and `/**`
-* `cycle-comment-styles.multiLineCommentStyle`: Whether to cycle comment styles or convert to a single specific style for multi-line comments. Valid values are `default`, `//`, and `/**`
-* `cycle-comment-styles.collapsedLineSeparator`: When a multi-line comment is collapsed, this is the separator that will repalce each newline (\n)
+- `cycle-comment-styles.singleLineCommentStyle`: Whether to cycle comment styles or convert to a single specific style for single-line comments. Valid values are `default`, `//`, `/*`, and `/**`
+- `cycle-comment-styles.multiLineCommentStyle`: Whether to cycle comment styles or convert to a single specific style for multi-line comments. Valid values are `default`, `//`, and `/**`
+- `cycle-comment-styles.collapsedLineSeparator`: When a multi-line comment is collapsed, this is the separator that will repalce each newline (\n)
 
 <!-- ## Known Issues
 
@@ -36,9 +36,11 @@ Calling out known issues can help limit users opening duplicate issues against y
 
 ## Release Notes
 
-### 1.0.1
+### 1.0.2 - 2022-04-16
 
-## [1.0.1] - 2022-04-16
+Apparently you have to publish a new version to update the README?
+
+### 1.0.1 - 2022-04-16
 
 Changed DisplayName to make it prettier. :)
 
