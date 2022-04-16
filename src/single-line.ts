@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import { Comment } from './extension';
 
 export const singleLinePatterns = [
@@ -27,10 +26,6 @@ export function handleSingleLineComments(comments: Comment[]): Comment[] {
       nextPatternIndex !== singleLinePatterns.length ? nextPatternIndex : 0
     ];
 
-  /**
-   * Tracks all comments updated with the new comment patterns
-   * in the `newText` key.
-   */
   const updatedComments = comments.map((comment) => {
     const { text, patternIndex } = comment;
     const matchingPattern = singleLinePatterns[patternIndex];
@@ -56,18 +51,6 @@ export function handleSingleLineComments(comments: Comment[]): Comment[] {
     return updatedComment;
   });
 
-  const editor = vscode.window.activeTextEditor;
-  if (!editor) {
-    console.error('Editor not found - cannot make replacements.');
-    return updatedComments;
-  }
-
-  // Replace all matching selections with the new text
-  editor.edit((editBuilder) => {
-    updatedComments.forEach((comment) => {
-      editBuilder.replace(comment.selection, comment.text);
-    });
-  });
   return updatedComments;
 }
 

@@ -89,8 +89,20 @@ export function activate(context: vscode.ExtensionContext) {
         'multi'
       );
 
-      handleSingleLineComments(singleLineComments);
-      handleMultiLineComments(multiLineComments);
+      const updatedSingleLineComments =
+        handleSingleLineComments(singleLineComments);
+      const updatedMultiLineComments =
+        handleMultiLineComments(multiLineComments);
+
+      // Replace all matching selections with the new text
+      editor.edit((editBuilder) => {
+        updatedSingleLineComments.forEach((comment) => {
+          editBuilder.replace(comment.selection, comment.text);
+        });
+        updatedMultiLineComments.forEach((comment) => {
+          editBuilder.replace(comment.selection, comment.text);
+        });
+      });
     }
   );
 

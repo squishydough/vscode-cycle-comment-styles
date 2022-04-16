@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import { Comment } from './extension';
 
 export const multiLinePatterns = [
@@ -20,16 +19,9 @@ export function handleMultiLineComments(comments: Comment[]): Comment[] {
    * all selected comments. Doing it this way converts all
    * comment types to a single comment type.
    */
-  let nextPatternIndex = comments[0].patternIndex + 1;
-  const nextPattern =
-    multiLinePatterns[
-      nextPatternIndex !== multiLinePatterns.length ? nextPatternIndex : 0
-    ];
+  let nextPatternIndex = comments[0].patternIndex === 0 ? 1 : 0;
+  const nextPattern = multiLinePatterns[nextPatternIndex];
 
-  /**
-   * Tracks all comments updated with the new comment patterns
-   * in the `newText` key.
-   */
   const updatedComments = comments.map((comment) => {
     const { text, patternIndex } = comment;
 
@@ -43,19 +35,44 @@ export function handleMultiLineComments(comments: Comment[]): Comment[] {
       return comment;
     }
 
-    const newFirstLine = firstLine
-      .trim()
-      .replace(matchingPattern.start, nextPattern.start);
+    let newText = '';
 
-    const newLastLine = lastLine
-      .trim()
-      .replace(matchingPattern.end, nextPattern.end);
-
-    const newLines = lines.map((line) =>
-      line.trim().replace(matchingPattern.mid, nextPattern.mid)
-    );
-
-    const newText = `${newFirstLine}\n${newLines.join('\n')}\n${newLastLine}`;
+    /**
+     * Since we want all comments to become uniform,
+     * it's possible for the matchingPattern and nextPattern to match.
+     * In this situation, there is no need to do anything.
+     *
+     * If matchingPattern starts with //, then we have to build
+     * out the entire multiline comment.
+     *
+     * If matchingPattern starts with /**, then we have to build
+     * out each line with //, which is significantly easier!
+     */
+    if (matchingPattern.start === nextPattern.start) {
+      newText = text;
+    } else if (matchingPattern.start === '//') {
+      newText = `${nextPattern.start}\n`;
+      newText += ` ${nextPattern.mid}${firstLine
+        .trim()
+        .replace(matchingPattern.start, '')}\n`;
+      for (let i = 0; i < lines.length; i++) {
+        newText += ` ${nextPattern.mid}${lines[i]
+          .trim()
+          .replace(matchingPattern.start, '')}\n`;
+      }
+      newText += ` ${nextPattern.mid}${lastLine
+        .trim()
+        .replace(matchingPattern.mid, '')}\n`;
+      newText += ` ${nextPattern.end}`;
+    } else {
+      for (let i = 0; i < lines.length; i++) {
+        newText += `${lines[i]
+          .trim()
+          .replace(matchingPattern.mid, nextPattern.mid)}${
+          i === lines.length - 1 ? '' : '\n'
+        }`;
+      }
+    }
 
     const updatedComment: Comment = {
       ...comment,
@@ -66,18 +83,6 @@ export function handleMultiLineComments(comments: Comment[]): Comment[] {
     return updatedComment;
   });
 
-  const editor = vscode.window.activeTextEditor;
-  if (!editor) {
-    console.error('Editor not found - cannot make replacements.');
-    return updatedComments;
-  }
-
-  // Replace all matching selections with the new text
-  editor.edit((editBuilder) => {
-    updatedComments.forEach((comment) => {
-      editBuilder.replace(comment.selection, comment.text);
-    });
-  });
   return updatedComments;
 }
 

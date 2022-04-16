@@ -4,7 +4,10 @@ import * as assert from 'assert';
 // as well as import your extension to test it
 import * as vscode from 'vscode';
 import type { Comment } from '../../extension';
-import { textMatchesMultiLinePattern } from '../../multi-line';
+import {
+  handleMultiLineComments,
+  textMatchesMultiLinePattern,
+} from '../../multi-line';
 import {
   handleSingleLineComments,
   textMatchesSingleLinePattern,
@@ -128,30 +131,30 @@ suite('Extension Test Suite', () => {
    * Function should make all mock comments uniform,
    * while also cycling through single-line comment types.
    */
-  // test('handleMultiLineComments', () => {
-  //   const mockComments: Comment[] = [
-  //     {
-  //       selection: new vscode.Selection(0, 0, 0, 0),
-  //       text: '// comment 1\n// comment 2',
-  //       patternIndex: 0,
-  //       commentType: 'multi',
-  //     },
-  //     {
-  //       selection: new vscode.Selection(1, 0, 1, 0),
-  //       text: '/**\n* comment 3\n* comment 4\n*/',
-  //       patternIndex: 1,
-  //       commentType: 'multi',
-  //     },
-  //   ];
+  test('handleMultiLineComments', () => {
+    const mockComments: Comment[] = [
+      {
+        selection: new vscode.Selection(0, 0, 0, 0),
+        text: '// comment 1\r\n// comment 2',
+        patternIndex: 0,
+        commentType: 'multi',
+      },
+      {
+        selection: new vscode.Selection(1, 0, 1, 0),
+        text: '/**\n * comment 3\n * comment 4\n */',
+        patternIndex: 1,
+        commentType: 'multi',
+      },
+    ];
 
-  //   const updatedComments = handleSingleLineComments(mockComments);
-  //   assert(updatedComments.length === 2);
-  //   assert(updatedComments[0].text === '/**\n* comment 1\n* comment 2\n*/');
-  //   assert(updatedComments[1].text === '/**\n* comment 3\n* comment 4\n*/');
+    const updatedComments = handleMultiLineComments(mockComments);
+    assert(updatedComments.length === 2);
+    assert(updatedComments[0].text === '/**\n * comment 1\n * comment 2\n */');
+    assert(updatedComments[1].text === '/**\n * comment 3\n * comment 4\n */');
 
-  //   const updatedComments2 = handleSingleLineComments(updatedComments);
-  //   assert(updatedComments2.length === 2);
-  //   assert(updatedComments2[0].text === '// comment 1\n// comment 2');
-  //   assert(updatedComments2[1].text === '// comment 3\n// comment 4');
-  // });
+    const updatedComments2 = handleMultiLineComments(updatedComments);
+    assert(updatedComments2.length === 2);
+    assert(updatedComments2[0].text === '// comment 1\n// comment 2');
+    assert(updatedComments2[1].text === '// comment 3\n// comment 4');
+  });
 });
