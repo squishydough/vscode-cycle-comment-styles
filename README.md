@@ -11,6 +11,17 @@ for exactly how this should behave!
 
 ![Exactly this](readme/features.jpg)
 
+## Usage
+
+From the command palette, you will find the following commands:
+
+- `Cycle Comment Styles: Cycle Comment Styles`: This will cycle through all comment styles  
+for all single-line and multi-line comments. If multiple comment styles are found, the extension  
+will make them uniform. Single-line and multi-line comments are grouped and treated separately.
+
+- `Cycle Comment Styles: Expand Collapse Comments`: This will cycle through all TSDoc single-line and multi-line comments 
+and expand or collapse them.
+
 ## Extension Settings
 
 This extension contributes the following settings:
