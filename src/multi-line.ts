@@ -101,6 +101,7 @@ export function handleMultiLineComments(comments: Comment[]): Comment[] {
       // Appends the */ at the bottom.
       newText += ` ${nextPattern.end}`;
     } else {
+      // Appends the // before each line of the comment.
       for (let i = 0; i < lines.length; i++) {
         newText += `${lines[i]
           .trim()
