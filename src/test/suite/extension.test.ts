@@ -13,8 +13,6 @@ import {
   textMatchesSingleLinePattern,
 } from '../../single-line';
 
-// TODO Add tests for various configuration options
-
 suite('Extension Test Suite', () => {
   vscode.window.showInformationMessage('Start all tests.');
 
