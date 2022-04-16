@@ -27,6 +27,11 @@
           "type": "string",
           "description": "Behavior with multi-line comments. By default, comment styles cycle on each command invocation. Valid values are `default`, `//`, and `/**`. Changes require a reload of VS Code to take effect.",
           "default": "default"
+        },
+        "cycle-comment-styles.collapsedLineSeparator": {
+          "type": "string",
+          "description": "Behavior with collapsing multi-line comments. Every \n line of a multi-line comment is collapsed into a single line, with this string as the separator. Changes require a reload of VS Code to take effect.",
+          "default": " :: "
         }
       }
     },

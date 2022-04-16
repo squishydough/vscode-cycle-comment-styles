@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
+import { Comment } from '../../extension';
 import {
   handleMultiLineComments,
   textMatchesMultiLinePattern,
@@ -123,9 +124,18 @@ suite('Extension Test Suite', () => {
       'updatedSingleLineComments[2] should be expanded and uniform.'
     );
 
+    /** User's preference for single line comment styles. */
+    const configuration = vscode.workspace.getConfiguration(
+      'cycle-comment-styles'
+    );
+    const collapsedLineSeparator = configuration.get(
+      'collapsedLineSeparator'
+    ) as string;
+
     assert(
-      updatedMultiLineComments[0].text === '/** comment 3 :: comment 4 */',
-      'updatedMultiLineComments[0] should be collapsed and uniform.'
+      updatedMultiLineComments[0].text ===
+        `/** comment 3${collapsedLineSeparator}comment 4 */`,
+      `updatedMultiLineComments[0] should be collapsed and uniform. Value ${updatedMultiLineComments[0].text}`
     );
   });
 

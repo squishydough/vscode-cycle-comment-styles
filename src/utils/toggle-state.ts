@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { Comment } from '../extension';
 import { singleLinePatterns } from './cycle-single';
 
@@ -15,6 +16,14 @@ export function handleToggleCommentState(
   updatedSingleLineComments: Comment[];
   updatedMultiLineComments: Comment[];
 } {
+  /** User's preference for single line comment styles. */
+  const configuration = vscode.workspace.getConfiguration(
+    'cycle-comment-styles'
+  );
+  const collapsedLineSeparator = configuration.get(
+    'collapsedLineSeparator'
+  ) as string;
+
   // We only want multi-line comments that match the expanded pattern.
   // The expanded pattern is the same as multiLinePatterns[1].
   // Since each comment has a patternIndex prop, we can use this to
@@ -28,16 +37,21 @@ export function handleToggleCommentState(
     const pattern = singleLinePatterns[comment.patternIndex];
 
     let newText = '';
+
     // Add the /** as the first line
     newText = '/**\n';
+
     // Add the second line with * in front
-    // Replace the start pattern with the * character.
+    // Replace the start pattern with the * character
     // Replace the end pattern with nothing
+    // Replace the collapsedLineSeparator with new lines
     // Trim the whitespace off the end only
     newText += comment.text
       .replace(pattern.start, ` ${expandedPattern.mid}`)
       .replace(pattern.end, '')
+      .replace(collapsedLineSeparator, '\n * ')
       .replace(/\s*$/, '');
+
     // Add the */ as the last line
     newText += '\n */';
 
@@ -71,10 +85,9 @@ export function handleToggleCommentState(
 
     // Outputs the lines as a single-line comment.
     // Each new line is merged with a ' :: ' character
-    // TODO Allow customizing the separator in the settings.
-    const newText = `${collapsedPattern.start} ${lines.join(' :: ')} ${
-      collapsedPattern.end
-    }`;
+    const newText = `${collapsedPattern.start} ${lines.join(
+      collapsedLineSeparator
+    )} ${collapsedPattern.end}`;
     const updatedComment: Comment = {
       ...comment,
       text: newText,
