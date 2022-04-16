@@ -1,16 +1,18 @@
 {
   "name": "cycle-comment-styles",
   "displayName": "cycle-comment-styles",
+  "author": "Josh Payette",
   "description": "",
   "homepage": "https://github.com/joshwaiam/vscode-cycle-comment-styles",
   "repository": {
     "type": "git",
     "url": "https://github.com/joshwaiam/vscode-cycle-comment-styles.git"
   },
-  "version": "0.0.1",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.66.0"
   },
+  "publisher": "JoshPayette",
   "categories": [
     "Other"
   ],
