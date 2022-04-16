@@ -10,14 +10,34 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:cycle-comment-styles.cycleCommentStyles"
+    "onCommand:cycle-comment-styles.cycleCommentStyles",
+    "onCommand:cycle-comment-styles.toggleCommentState"
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "Cycle Comment Styles configuration",
+      "properties": {
+        "cycle-comment-styles.singleLineCommentStyle": {
+          "type": "string",
+          "description": "Behavior with single-line comments. By default, comment styles cycle on each command invocation. Valid values are `default`, `//`, `/*`, and `/**`. Changes require a reload of VS Code to take effect.",
+          "default": "default"
+        },
+        "cycle-comment-styles.multiLineCommentStyle": {
+          "type": "string",
+          "description": "Behavior with multi-line comments. By default, comment styles cycle on each command invocation. Valid values are `default`, `//`, and `/**`. Changes require a reload of VS Code to take effect.",
+          "default": "default"
+        }
+      }
+    },
     "commands": [
       {
         "command": "cycle-comment-styles.cycleCommentStyles",
         "title": "Cycle Comment Styles: Cycle Comment Styles"
+      },
+      {
+        "command": "cycle-comment-styles.toggleCommentState",
+        "title": "Cycle Comment Styles: Expand/Collapse Comments"
       }
     ]
   },

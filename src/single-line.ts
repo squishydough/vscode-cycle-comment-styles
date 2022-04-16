@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { Comment } from './extension';
 
 export const singleLinePatterns = [
@@ -6,26 +7,48 @@ export const singleLinePatterns = [
   { start: '/*', end: '*/' },
 ];
 
-/**
- * Replaces all selected single-line comments with the next pattern.
- */
+/** Replaces all selected single-line comments with the next pattern. */
 export function handleSingleLineComments(comments: Comment[]): Comment[] {
   if (comments.length === 0) {
     console.info('No comments found.');
     return comments;
   }
 
+  /** User's preference for single line comment styles. */
+  const configuration = vscode.workspace.getConfiguration(
+    'cycle-comment-styles'
+  );
+  const singleLineCommentStyle = configuration.get(
+    'singleLineCommentStyle'
+  ) as string;
+
+  const validCommentStyles = ['//', '/*', '/**'];
+
   /**
-   * The next single pattern index that will be applied to
-   * all selected comments. Doing it this way converts all
-   * comment types to a single comment type.
+   * How the comment styles behave.
+   * If `default`, comment styles will cycle on a loop.
+   * If set to a specific pattern, all comments will be replaced with that pattern.
    */
-  let nextPatternIndex = comments[0].patternIndex + 1;
+  let commentStyle = 'default';
+  if (validCommentStyles.some((s) => s === singleLineCommentStyle)) {
+    commentStyle = singleLineCommentStyle;
+  }
+
+  let nextPatternIndex = 0;
+  if (commentStyle === 'default') {
+    nextPatternIndex = comments[0].patternIndex + 1;
+  } else {
+    nextPatternIndex = singleLinePatterns.findIndex(
+      (pattern) => pattern.start === commentStyle
+    );
+  }
   const nextPattern =
     singleLinePatterns[
       nextPatternIndex !== singleLinePatterns.length ? nextPatternIndex : 0
     ];
 
+  // Loops through all comments, replacing the existing pattern with the
+  // next pattern.
   const updatedComments = comments.map((comment) => {
     const { text, patternIndex } = comment;
     const matchingPattern = singleLinePatterns[patternIndex];
@@ -39,12 +62,12 @@ export function handleSingleLineComments(comments: Comment[]): Comment[] {
     if (matchingPattern.end === '\n') {
       newText = `${newText} ${endPattern}`;
     } else {
-      newText = newText.replace(matchingPattern.end, endPattern).trim();
+      newText = newText.replace(matchingPattern.end, endPattern);
     }
 
     const updatedComment: Comment = {
       ...comment,
-      text: newText,
+      text: newText.trim(),
       patternIndex: nextPatternIndex,
     };
 
@@ -54,9 +77,7 @@ export function handleSingleLineComments(comments: Comment[]): Comment[] {
   return updatedComments;
 }
 
-/**
- * Checks whether a text string matches a single-line comment pattern.
- */
+/** Checks whether a text string matches a single-line comment pattern. */
 export function textMatchesSingleLinePattern(text: string): [boolean, number] {
   /**
    * Array index of singleLinePatterns that was matched.

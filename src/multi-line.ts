@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { Comment } from './extension';
 
 export const multiLinePatterns = [
@@ -5,23 +6,49 @@ export const multiLinePatterns = [
   { start: '/**', mid: '*', end: '*/' },
 ];
 
-/**
- * Replaces all selected multi-line comments with the next pattern.
- */
+/** Replaces all selected multi-line comments with the next pattern. */
 export function handleMultiLineComments(comments: Comment[]): Comment[] {
   if (comments.length === 0) {
     console.info('No comments found.');
     return comments;
   }
 
-  /**
-   * The next multi pattern index that will be applied to
-   * all selected comments. Doing it this way converts all
-   * comment types to a single comment type.
-   */
-  let nextPatternIndex = comments[0].patternIndex === 0 ? 1 : 0;
-  const nextPattern = multiLinePatterns[nextPatternIndex];
+  /** User's preference for single line comment styles. */
+  const configuration = vscode.workspace.getConfiguration(
+    'cycle-comment-styles'
+  );
+  const multiLineCommentStyle = configuration.get(
+    'multiLineCommentStyle'
+  ) as string;
 
+  const validCommentStyles = ['//', '/**'];
+
+  /**
+   * How the comment styles behave.
+   * If `default`, comment styles will cycle on a loop.
+   * If set to a specific pattern, all comments will be replaced with that pattern.
+   */
+  let commentStyle = 'default';
+  if (validCommentStyles.some((s) => s === multiLineCommentStyle)) {
+    commentStyle = multiLineCommentStyle;
+  }
+
+  let nextPatternIndex = 0;
+  if (commentStyle === 'default') {
+    nextPatternIndex = comments[0].patternIndex + 1;
+  } else {
+    nextPatternIndex = multiLinePatterns.findIndex(
+      (pattern) => pattern.start === commentStyle
+    );
+  }
+
+  const nextPattern =
+    multiLinePatterns[
+      nextPatternIndex !== multiLinePatterns.length ? nextPatternIndex : 0
+    ];
+
+  // Loops through all comments, replacing the existing pattern with the
+  // next pattern.
   const updatedComments = comments.map((comment) => {
     const { text, patternIndex } = comment;
 
