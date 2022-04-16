@@ -25,6 +25,12 @@ Calling out known issues can help limit users opening duplicate issues against y
 
 ## Release Notes
 
+### 1.0.1
+
+## [1.0.1] - 2022-04-16
+
+Changed DisplayName to make it prettier. :)
+
 ### 1.0.0
 
 Initial release of Cycle Comment Styles
