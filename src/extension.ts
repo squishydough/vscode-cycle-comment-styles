@@ -1,12 +1,8 @@
 import * as vscode from 'vscode';
-import {
-  handleMultiLineComments,
-  textMatchesMultiLinePattern,
-} from './multi-line';
-import {
-  handleSingleLineComments,
-  textMatchesSingleLinePattern,
-} from './single-line';
+import { handleMultiLineComments } from './utils/cycle-multi';
+import { handleSingleLineComments } from './utils/cycle-single';
+import { selectionsToComments } from './utils/misc';
+import { handleToggleCommentState } from './utils/toggle-state';
 
 export interface Comment {
   selection: vscode.Selection;
@@ -15,74 +11,21 @@ export interface Comment {
   commentType: 'single' | 'multi';
 }
 
-/**
- * Iterates through VSCode text selections and returns only the single-line comments,
- * along with additional helpful information.
- */
-export function parseCommentsFromSelections(
-  selections: vscode.Selection[],
-  commentType: Comment['commentType']
-): Comment[] {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor) {
-    return [];
-  }
-
-  const comments: Comment[] = [];
-
-  selections.forEach((selection) => {
-    const text = editor.document.getText(selection);
-    const [textMatches, matchingPatternIndex] =
-      commentType === 'single'
-        ? textMatchesSingleLinePattern(text)
-        : textMatchesMultiLinePattern(text);
-    if (!textMatches || matchingPatternIndex === -1) {
-      return;
-    }
-    const comment: Comment = {
-      selection,
-      text,
-      patternIndex: matchingPatternIndex,
-      commentType: 'single',
-    };
-    comments.push(comment);
-  });
-
-  return comments;
-}
-
 export function activate(context: vscode.ExtensionContext) {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
     return;
   }
 
+  /** Main method for the cycleCommentStyles command. */
   const cycleCommentStyles = vscode.commands.registerCommand(
     'cycle-comment-styles.cycleCommentStyles',
     () => {
-      const singleLineSelections: vscode.Selection[] = [];
-      const multiLineSelections: vscode.Selection[] = [];
-
-      editor.selections.forEach((selection) => {
-        const text = editor.document.getText(selection);
-        if (text.includes('\n')) {
-          multiLineSelections.push(selection);
-        } else {
-          singleLineSelections.push(selection);
-        }
-      });
-
-      const singleLineComments = parseCommentsFromSelections(
-        singleLineSelections,
-        'single'
-      );
-      const multiLineComments = parseCommentsFromSelections(
-        multiLineSelections,
-        'multi'
-      );
+      const { singleLineComments, multiLineComments } = selectionsToComments();
 
       const updatedSingleLineComments =
         handleSingleLineComments(singleLineComments);
+
       const updatedMultiLineComments =
         handleMultiLineComments(multiLineComments);
 
@@ -91,6 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
         updatedSingleLineComments.forEach((comment) => {
           editBuilder.replace(comment.selection, comment.text);
         });
+
         updatedMultiLineComments.forEach((comment) => {
           editBuilder.replace(comment.selection, comment.text);
         });
@@ -98,11 +42,24 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  /** Main method for the toggleCommentState command. */
   const toggleCommentState = vscode.commands.registerCommand(
     'cycle-comment-styles.toggleCommentState',
     () => {
-      editor.selections.forEach((selection) => {
-        // console.info(selection);
+      const { singleLineComments, multiLineComments } = selectionsToComments();
+
+      const { updatedSingleLineComments, updatedMultiLineComments } =
+        handleToggleCommentState(singleLineComments, multiLineComments);
+
+      // Replace all matching selections with the new text
+      editor.edit((editBuilder) => {
+        updatedSingleLineComments.forEach((comment) => {
+          editBuilder.replace(comment.selection, comment.text);
+        });
+
+        updatedMultiLineComments.forEach((comment) => {
+          editBuilder.replace(comment.selection, comment.text);
+        });
       });
     }
   );

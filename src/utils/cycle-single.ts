@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Comment } from './extension';
+import { Comment } from '../extension';
 
 export const singleLinePatterns = [
   { start: '//', end: '\n' },
