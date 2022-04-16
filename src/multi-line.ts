@@ -78,18 +78,27 @@ export function handleMultiLineComments(comments: Comment[]): Comment[] {
     if (matchingPattern.start === nextPattern.start) {
       newText = text;
     } else if (matchingPattern.start === '//') {
+      // Appends the /** at the top.
       newText = `${nextPattern.start}\n`;
+
+      // Appends the * before the first line of the comment.
       newText += ` ${nextPattern.mid}${firstLine
         .trim()
         .replace(matchingPattern.start, '')}\n`;
+
+      // Appends the * before each line of the comment (other than first and last).
       for (let i = 0; i < lines.length; i++) {
         newText += ` ${nextPattern.mid}${lines[i]
           .trim()
           .replace(matchingPattern.start, '')}\n`;
       }
+
+      // Appends the * befoer the last line of the comment.
       newText += ` ${nextPattern.mid}${lastLine
         .trim()
         .replace(matchingPattern.mid, '')}\n`;
+
+      // Appends the */ at the bottom.
       newText += ` ${nextPattern.end}`;
     } else {
       for (let i = 0; i < lines.length; i++) {
